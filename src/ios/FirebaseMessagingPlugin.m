@@ -1,17 +1,36 @@
 #import "FirebaseMessagingPlugin.h"
 #import <Cordova/CDV.h>
-#import "AppDelegate.h"
 
-@import FirebaseCore;
-@import FirebaseMessaging;
+#import <Firebase/Firebase.h>
 
 @implementation FirebaseMessagingPlugin
 
 - (void)pluginInitialize {
     NSLog(@"Starting Firebase Messaging plugin");
 
+    [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(bridgeWillPresent:)
+        name:@"bridgeWillPresent"
+        object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(bridgeDidReceive:)
+        name:@"bridgeDidReceive"
+        object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didFinishLaunchingListener:) name:UIApplicationDidFinishLaunchingNotification object:nil];
+
     if(![FIRApp defaultApp]) {
         [FIRApp configure];
+    }
+}
+
+- (void)didFinishLaunchingListener:(NSNotification *)notification {
+    NSDictionary *launchOptions = notification.userInfo;
+    NSDictionary *userInfo = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
+
+    if (userInfo != nil) {
+        [self sendBackgroundNotification:userInfo];
     }
 }
 
@@ -27,7 +46,7 @@
     }
 
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    UNAuthorizationOptions authOptions = (UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge);
+    UNAuthorizationOptions authOptions = (UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge | UNAuthorizationOptionProvisional);
     [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError* err) {
         CDVPluginResult *pluginResult;
         if (err) {
@@ -172,6 +191,16 @@
     self.tokenRefreshCallbackId = command.callbackId;
 }
 
+- (void)bridgeWillPresent:(NSNotification *) notification {
+    NSDictionary* userInfo = [notification userInfo];
+    [self sendNotification:userInfo];
+}
+
+- (void)bridgeDidReceive:(NSNotification *) notification {
+    NSDictionary* userInfo = [notification userInfo];
+    [self sendBackgroundNotification:userInfo];
+}
+
 - (void)sendNotification:(NSDictionary *)userInfo {
     if (self.notificationCallbackId) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:userInfo];
@@ -180,7 +209,7 @@
     }
 }
 
-- (void)sendBackgroundNotification:(NSDictionary *)userInfo {
+- (void)sendBackgroundNotification:(NSDictionary *) userInfo {
     if (self.backgroundNotificationCallbackId) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:userInfo];
         [pluginResult setKeepCallbackAsBool:YES];
