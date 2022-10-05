@@ -68,33 +68,33 @@ public class FirebaseMessagingPlugin extends ReflectiveCordovaPlugin {
         lastBundle = getNotificationData(cordova.getActivity().getIntent());
     }
 
-    @CordovaMethod(WORKER)
+    @CordovaMethod(ExecutionThread.WORKER)
     private void subscribe(CordovaArgs args, final CallbackContext callbackContext) throws Exception {
         String topic = args.getString(0);
         await(firebaseMessaging.subscribeToTopic(topic));
         callbackContext.success();
     }
 
-    @CordovaMethod(WORKER)
+    @CordovaMethod(ExecutionThread.WORKER)
     private void unsubscribe(CordovaArgs args, CallbackContext callbackContext) throws Exception {
         String topic = args.getString(0);
         await(firebaseMessaging.unsubscribeFromTopic(topic));
         callbackContext.success();
     }
 
-    @CordovaMethod
+    @CordovaMethod(ExecutionThread.WORKER)
     private void clearNotifications(CallbackContext callbackContext) {
         notificationManager.cancelAll();
         callbackContext.success();
     }
 
-    @CordovaMethod(WORKER)
+    @CordovaMethod(ExecutionThread.WORKER)
     private void deleteToken(CallbackContext callbackContext) throws Exception {
         await(firebaseMessaging.deleteToken());
         callbackContext.success();
     }
 
-    @CordovaMethod(WORKER)
+    @CordovaMethod(ExecutionThread.WORKER)
     private void getToken(CordovaArgs args, CallbackContext callbackContext) throws Exception {
         String type = args.getString(0);
         if (!type.isEmpty()) {
@@ -105,17 +105,17 @@ public class FirebaseMessagingPlugin extends ReflectiveCordovaPlugin {
         }
     }
 
-    @CordovaMethod
+    @CordovaMethod(ExecutionThread.WORKER)
     private void onTokenRefresh(CallbackContext callbackContext) {
         instance.tokenRefreshCallback = callbackContext;
     }
 
-    @CordovaMethod
+    @CordovaMethod(ExecutionThread.WORKER)
     private void onMessage(CallbackContext callbackContext) {
         instance.foregroundCallback = callbackContext;
     }
 
-    @CordovaMethod
+    @CordovaMethod(ExecutionThread.WORKER)
     private void onBackgroundMessage(CallbackContext callbackContext) {
         instance.backgroundCallback = callbackContext;
 
@@ -125,7 +125,7 @@ public class FirebaseMessagingPlugin extends ReflectiveCordovaPlugin {
         }
     }
 
-    @CordovaMethod
+    @CordovaMethod(ExecutionThread.WORKER)
     private void setBadge(CordovaArgs args, CallbackContext callbackContext) throws JSONException {
         int value = args.getInt(0);
         if (value >= 0) {
@@ -137,14 +137,14 @@ public class FirebaseMessagingPlugin extends ReflectiveCordovaPlugin {
         }
     }
 
-    @CordovaMethod
+    @CordovaMethod(ExecutionThread.WORKER)
     private void getBadge(CallbackContext callbackContext) {
         Context context = cordova.getActivity();
         SharedPreferences settings = context.getSharedPreferences("badge", Context.MODE_PRIVATE);
         callbackContext.success(settings.getInt("badge", 0));
     }
 
-    @CordovaMethod
+    @CordovaMethod(ExecutionThread.WORKER)
     private void requestPermission(CordovaArgs args, CallbackContext callbackContext) throws JSONException {
         JSONObject options = args.getJSONObject(0);
         Context context = cordova.getActivity().getApplicationContext();
