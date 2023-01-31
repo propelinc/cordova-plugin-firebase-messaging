@@ -48,9 +48,9 @@
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
     UNAuthorizationOptions authOptions = (UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge);
     
-    NSNumber* includeProvisionalSetting = options[@"includeProvisional"];
-    if (includeProvisionalSetting && [includeProvisionalSetting boolValue]) {
-        authOptions = (UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge | UNAuthorizationOptionProvisional);
+    NSNumber* provisionalSetting = options[@"provisional"];
+    if (provisionalSetting && [provisionalSetting boolValue]) {
+        authOptions = (UNAuthorizationOptionProvisional);
     }
     
     [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError* err) {
