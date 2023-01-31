@@ -312,7 +312,7 @@ Ask for permission to recieve push notifications (will trigger prompt on iOS).
 **`Example`**
 
 ```ts
-cordova.plugins.firebase.messaging.requestPermission({forceShow: false}).then(function() {
+cordova.plugins.firebase.messaging.requestPermission({forceShow: false, includeProvisional: false}).then(function() {
     console.log("Push messaging is allowed");
 });
 ```
@@ -323,6 +323,7 @@ cordova.plugins.firebase.messaging.requestPermission({forceShow: false}).then(fu
 | :------ | :------ | :------ |
 | `options` | `Object` | Additional options. |
 | `options.forceShow` | `boolean` | When value is `true` incoming notification is displayed even when app is in foreground. |
+| `options.includeProvisional` | `boolean` | (iOS only) When value is `true` provisional notification permissions are also requested. Keep in mind that for iOS you only get one native prompt to show the user. So setting this to `true` will end up in notifications delivering quietly unless a user manually alters their notifications settings on their phone. |
 
 #### Returns
 

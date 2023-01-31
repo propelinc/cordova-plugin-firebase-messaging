@@ -46,7 +46,13 @@
     }
 
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    UNAuthorizationOptions authOptions = (UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge | UNAuthorizationOptionProvisional);
+    UNAuthorizationOptions authOptions = (UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge);
+    
+    NSNumber* includeProvisionalSetting = options[@"includeProvisional"];
+    if (includeProvisionalSetting && [includeProvisionalSetting boolValue]) {
+        authOptions = (UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge | UNAuthorizationOptionProvisional);
+    }
+    
     [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError* err) {
         CDVPluginResult *pluginResult;
         if (err) {
