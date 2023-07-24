@@ -48,21 +48,21 @@ public class FirebaseMessagingPlugin extends ReflectiveCordovaPlugin {
     private FirebaseMessaging firebaseMessaging;
     private CallbackContext requestPermissionCallback;
 
-    private final ActivityResultLauncher<String> requestPermissionLauncher = cordova.getActivity()
-            .registerForActivityResult(
-                    new ActivityResultContracts.RequestPermission(), isGranted -> {
-                        if (isGranted) {
-                            // FCM SDK (and your app) can post notifications.
-                            requestPermissionCallback.success();
-                        } else {
-                            requestPermissionCallback.error("Notifications permission is not granted");
-                        }
-                    });
+    private ActivityResultLauncher<String> requestPermissionLauncher = null;
 
     @Override
     protected void pluginInitialize() {
         FirebaseMessagingPlugin.instance = this;
 
+        requestPermissionLauncher = cordova.getActivity().registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    // FCM SDK (and your app) can post notifications.
+                    requestPermissionCallback.success();
+                } else {
+                    requestPermissionCallback.error("Notifications permission is not granted");
+                }
+        });
         firebaseMessaging = FirebaseMessaging.getInstance();
         notificationManager = getSystemService(cordova.getActivity(), NotificationManager.class);
         lastBundle = getNotificationData(cordova.getActivity().getIntent());
@@ -147,6 +147,11 @@ public class FirebaseMessagingPlugin extends ReflectiveCordovaPlugin {
     @CordovaMethod
     private void requestPermission(CordovaArgs args, CallbackContext callbackContext) throws JSONException {
         JSONObject options = args.getJSONObject(0);
+        if (options.getBoolean("provisional")) {
+            Log.i(TAG, "Provisional notifications not supported on Android.");
+            return;
+        }
+
         Context context = cordova.getActivity().getApplicationContext();
         forceShow = options.optBoolean("forceShow");
         if (NotificationManagerCompat.from(context).areNotificationsEnabled()) {
